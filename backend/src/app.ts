@@ -5,12 +5,16 @@ import swaggerUI from "@fastify/swagger-ui";
 import jwt from "@fastify/jwt";
 import { userRoutes } from "./routes/users.routes";
 import { authRoutes } from "./routes/auth.routes";
-import { prisma } from "./plugins/db";
+
 
 const app = Fastify({ logger: true });
 
 // Plugins
-app.register(cors);
+app.register(cors, {
+  origin: true,
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+});
+
 app.register(swagger, {
   openapi: {
     info: {

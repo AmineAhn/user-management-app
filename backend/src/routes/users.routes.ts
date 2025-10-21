@@ -15,11 +15,25 @@ export async function userRoutes(app: FastifyInstance) {
     return UserService.findById(id);
   });
 
-  app.post("/", async (req, reply) => {
+app.post("/", async (req, reply) => {
+  try {
     const parsed = userSchema.safeParse(req.body);
-    if (!parsed.success) return reply.status(400).send(parsed.error);
-    return UserService.create(parsed.data);
-  });
+    if (!parsed.success) {
+      return reply.status(400).send(parsed.error);
+    }
+
+    const user = await UserService.create(parsed.data);
+
+    // TODO
+    return reply.status(201).send(user);
+  } catch (err: any) {
+    console.error(err);
+    return reply
+      .status(400)
+      .send({ message: err.message || "Failed to create user" });
+  }
+});
+
 
   app.put("/:id", async (req, reply) => {
     const id = Number((req.params as any).id);
