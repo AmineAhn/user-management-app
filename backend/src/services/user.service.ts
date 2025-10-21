@@ -1,34 +1,39 @@
 import { prisma } from "../plugins/db";
-import { UserInput } from "../schemas/user.schema";
 import bcrypt from "bcrypt";
+import { CreateUserInput, UpdateUserInput } from "../schemas/user.schema";
 
 export const UserService = {
-  async create(data: UserInput) {
+  async createUser(data: CreateUserInput) {
     if (!data.password || data.password.trim() === "") {
       throw new Error("Password is required");
     }
-    if (data.birthDate) {
-      data.birthDate = new Date(data.birthDate);
-    }
+
     const hashed = await bcrypt.hash(data.password, 10);
+
     return prisma.user.create({
-      data: { ...data, password: hashed },
+      data: {
+        ...data,
+        password: hashed,
+        birthDate: new Date(data.birthDate),
+      },
     });
   },
 
-  async findAll() {
-    return prisma.user.findMany();
+  async getAllUsers() {
+    return prisma.user.findMany({
+      orderBy: { firstName: "asc" }, // default order
+    });
   },
 
-  async findByEmail(email: string) {
+  async getUserByEmail(email: string) {
     return prisma.user.findUnique({ where: { email } });
   },
 
-  async findById(id: number) {
+  async getUserById(id: number) {
     return prisma.user.findUnique({ where: { id } });
   },
 
-  async update(id: number, data: Partial<UserInput>) {
+  async updateUser(id: number, data: UpdateUserInput) {
     if (data.password && data.password.trim() !== "") {
       // if new password => hash it
       data.password = await bcrypt.hash(data.password, 10);
@@ -41,10 +46,11 @@ export const UserService = {
     if (data.birthDate) {
       data.birthDate = new Date(data.birthDate);
     }
+
     return prisma.user.update({ where: { id }, data });
   },
 
-  async remove(id: number) {
+  async deleteUser(id: number) {
     return prisma.user.delete({ where: { id } });
   },
 };
