@@ -40,15 +40,16 @@ export const UserService = {
       limit = 10,
     } = params || {};
 
+    const lowered = search.toLowerCase();
     const where = search
       ? {
-          OR: [
-            { firstName: { contains: search, mode: "insensitive" } },
-            { lastName: { contains: search, mode: "insensitive" } },
-            { email: { contains: search, mode: "insensitive" } },
-          ],
-        }
-      : {};
+        OR: [
+          { firstName: { contains: lowered } },
+          { lastName: { contains: lowered } },
+          { email: { contains: lowered } },
+        ],
+      }
+    : {};
 
     const [users, total] = await prisma.$transaction([
       prisma.user.findMany({
