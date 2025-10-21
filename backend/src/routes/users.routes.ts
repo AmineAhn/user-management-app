@@ -6,10 +6,32 @@ import { verifyJWT } from "../utils/jwt";
 export async function userRoutes(app: FastifyInstance) {
   app.addHook("preHandler", verifyJWT);
 
-  app.get("/", async (req, reply) => {
+  // TODO
+  app.get("/all", async (req, reply) => {
     const users = await UserService.getAllUsers();
     reply.send(users);
   });
+
+  app.get("/", async (req, reply) => {
+  const { search, sortBy, order, page, limit } = req.query as {
+    search?: string;
+    sortBy?: string;
+    order?: "asc" | "desc";
+    page?: string;
+    limit?: string;
+  };
+
+  // TODO
+  const users = await UserService.getUsers({
+    search,
+    sortBy: sortBy as any,
+    order,
+    page: page ? Number(page) : 1,
+    limit: limit ? Number(limit) : 10,
+  });
+
+  reply.send(users);
+});
 
   app.get("/:id", async (req, reply) => {
     const id = Number((req.params as any).id);

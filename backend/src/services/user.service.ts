@@ -25,6 +25,52 @@ export const UserService = {
     });
   },
 
+  async getUsers(params?: {
+    search?: string;
+    sortBy?: keyof typeof prisma.user.fields;
+    order?: "asc" | "desc";
+    page?: number;
+    limit?: number;
+  }) {
+    const {
+      search = "",
+      sortBy = "firstName",
+      order = "asc",
+      page = 1,
+      limit = 10,
+    } = params || {};
+
+    const where = search
+      ? {
+          OR: [
+            { firstName: { contains: search, mode: "insensitive" } },
+            { lastName: { contains: search, mode: "insensitive" } },
+            { email: { contains: search, mode: "insensitive" } },
+          ],
+        }
+      : {};
+
+    const [users, total] = await prisma.$transaction([
+      prisma.user.findMany({
+        where,
+        orderBy: { [sortBy]: order },
+        skip: (page - 1) * limit,
+        take: limit,
+      }),
+      prisma.user.count({ where }),
+    ]);
+
+    return {
+      data: users,
+      meta: {
+        total,
+        page,
+        limit,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
+  },
+
   async getUserByEmail(email: string) {
     return prisma.user.findUnique({ where: { email } });
   },
