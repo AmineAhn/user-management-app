@@ -1,73 +1,97 @@
-# React + TypeScript + Vite
+# 🎨 Frontend – React + TypeScript + MUI
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+This folder contains the **frontend** of the User Management App, built with:
 
-Currently, two official plugins are available:
+- **React 18 + Vite**
+- **TypeScript**
+- **Material UI (MUI)** for UI components
+- **React Hook Form + Zod** for validation
+- **Axios** for API communication
+- **JWT authentication** via React Context
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
 
-## React Compiler
+## 🚀 Quick Start
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
-
-## Expanding the ESLint configuration
-
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
-
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+cd frontend
+npm install
+npm run dev
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+The app will run at [http://localhost:5173](http://localhost:5173).
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+Make sure the backend is running on [http://localhost:5000](http://localhost:5000).
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+---
+
+## ⚙️ Environment Variables
+
+If you use a `.env` file, include:
+
 ```
+VITE_API_URL=http://localhost:5000
+```
+
+---
+
+## 🧩 Features
+
+- 🔐 **Login** with JWT
+- 👥 **User Management Dashboard**
+  - Create / Edit / Delete users (MUI Dialogs)
+  - Sort, search, and paginate users (server-side)
+  - Rows-per-page selector
+- ✅ **Form validation** with React Hook Form + Zod
+- 🎨 **Responsive MUI UI**
+- 🔁 **Auth persistence** via localStorage
+
+---
+
+## 🧱 Project Structure
+
+```
+frontend/
+│
+├── src/
+│   ├── api/            # Axios client & user API helpers
+│   ├── components/     # Dialogs, tables, forms
+│   ├── context/        # Auth context (JWT handling)
+│   ├── pages/          # LoginPage, UsersPage
+│   ├── routes/         # ProtectedRoute, AppRoutes
+│   └── main.tsx        # Entry point (MUI ThemeProvider)
+│
+├── tsconfig.json
+├── vite.config.ts
+└── package.json
+```
+
+---
+
+## 🧠 Scripts
+
+| Command           | Description              |
+| ----------------- | ------------------------ |
+| `npm run dev`     | Start dev server         |
+| `npm run build`   | Build production app     |
+| `npm run preview` | Preview production build |
+
+---
+
+## 🧰 Tech Stack
+
+| Purpose    | Library              |
+| ---------- | -------------------- |
+| UI         | Material UI          |
+| Forms      | React Hook Form      |
+| Validation | Zod                  |
+| Routing    | React Router DOM     |
+| HTTP       | Axios                |
+| State      | React Context (Auth) |
+| Tooling    | Vite + TypeScript    |
+
+---
+
+## 📄 License
+
+MIT © 2025 Amine Ahniche
