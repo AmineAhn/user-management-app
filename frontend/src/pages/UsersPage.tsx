@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
-import { userApi } from "../api/userApi";
+import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { CreateUserForm } from "../components/CreateUserForm";
 import { EditUserForm } from "../components/EditUserForm";
+import { useUsers } from "../hooks/useUsers";
 import {
   Box,
   Button,
@@ -18,84 +18,49 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
-
-interface User {
-  id: number;
-  firstName: string;
-  lastName: string;
-  email: string;
-  birthDate: string;
-}
+import { userApi } from "src/api/userApi";
 
 export const UsersPage = () => {
   const { logout } = useAuth();
 
-  const [users, setUsers] = useState<User[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [editingUser, setEditingUser] = useState<User | null>(null);
-
+  const [editingUser, setEditingUser] = useState<any | null>(null);
   const [search, setSearch] = useState("");
-  const [sortField, setSortField] = useState<keyof User>("firstName");
+  const [sortField, setSortField] = useState<
+    "firstName" | "lastName" | "email" | "birthDate"
+  >("firstName");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
   const [limit, setLimit] = useState(5);
 
-  const fetchUsers = async () => {
-    try {
-      setLoading(true);
-      const res = await userApi.getAll({
-        search,
-        sortBy: sortField,
-        order: sortOrder,
-        page,
-        limit,
-      });
-
-      setUsers(res.data);
-      setTotalPages(res.meta.totalPages);
-    } catch (err: any) {
-      setError(err.response?.data?.message || "Failed to fetch users");
-    } finally {
-      setLoading(false);
-    }
-  };
+  const { users, loading, error, totalPages, refetch } = useUsers({
+    search,
+    sortBy: sortField,
+    order: sortOrder,
+    page,
+    limit,
+  });
 
   const handleDelete = async (id: number) => {
-    if (!confirm("Are you sure you want to delete this user?")) return;
+    if (!confirm("Êtes-vous sûr de vouloir supprimer cet utilisateur ?"))
+      return;
     try {
       await userApi.delete(id);
-      fetchUsers(); // refresh from backend
+      refetch();
     } catch {
-      alert("Failed to delete user");
+      alert("Erreur lors de la suppression.");
     }
   };
 
-  // fetch on mount
-  useEffect(() => {
-    fetchUsers();
-  }, []);
-
-  // refetch when search, sort, or pagination changes
-  useEffect(() => {
-    const delay = setTimeout(() => {
-      fetchUsers();
-    }, 400);
-
-    return () => clearTimeout(delay);
-  }, [search, sortField, sortOrder, page, limit]);
-
-  if (loading) return <p>Charegement utilisateurs...</p>;
+  if (loading) return <p>Chargement des utilisateurs...</p>;
   if (error) return <p style={{ color: "red" }}>{error}</p>;
 
   return (
     <Box p={4}>
       <Typography variant="h4" gutterBottom>
-        Utilisateurs
+        Liste des utilisateurs
       </Typography>
+
       <Box display="flex" gap={2} mb={2}>
         <Button variant="outlined" color="inherit" onClick={logout}>
           Se déconnecter
@@ -114,24 +79,25 @@ export const UsersPage = () => {
         <CreateUserForm
           onSuccess={() => {
             setShowCreateForm(false);
-            fetchUsers();
+            refetch();
           }}
           onCancel={() => setShowCreateForm(false)}
         />
       )}
+
       {editingUser && (
         <EditUserForm
           user={editingUser}
           onSuccess={() => {
             setEditingUser(null);
-            fetchUsers();
+            refetch();
           }}
           onCancel={() => setEditingUser(null)}
         />
       )}
 
       <TextField
-        label="Recherche avec nom ou email"
+        label="Recherche par nom ou email"
         variant="outlined"
         size="small"
         value={search}
@@ -154,21 +120,26 @@ export const UsersPage = () => {
       </Button>
 
       {users.length === 0 ? (
-        <p>Aucun utilisateur trouvé.</p>
+        <Typography mt={3}>Aucun utilisateur trouvé.</Typography>
       ) : (
         <div>
           <TableContainer component={Paper}>
             <Table>
               <TableHead>
                 <TableRow>
-                  {["Prénom", "lastName", "email", "birthDate"].map((key) => (
+                  {[
+                    { key: "firstName", label: "Prénom" },
+                    { key: "lastName", label: "Nom" },
+                    { key: "email", label: "Adresse e-mail" },
+                    { key: "birthDate", label: "Date de naissance" },
+                  ].map(({ key, label }) => (
                     <TableCell
                       key={key}
                       onClick={() => {
                         if (sortField === key) {
                           setSortOrder(sortOrder === "asc" ? "desc" : "asc");
                         } else {
-                          setSortField(key as keyof User);
+                          setSortField(key as any);
                           setSortOrder("asc");
                         }
                         setPage(1);
@@ -179,7 +150,7 @@ export const UsersPage = () => {
                           sortField === key ? "action.hover" : "transparent",
                       }}
                     >
-                      {key.charAt(0).toUpperCase() + key.slice(1)}{" "}
+                      {label}{" "}
                       {sortField === key
                         ? sortOrder === "asc"
                           ? "↑"
@@ -198,7 +169,7 @@ export const UsersPage = () => {
                     <TableCell>{u.lastName}</TableCell>
                     <TableCell>{u.email}</TableCell>
                     <TableCell>
-                      {new Date(u.birthDate).toLocaleDateString()}
+                      {new Date(u.birthDate).toLocaleDateString("fr-FR")}
                     </TableCell>
                     <TableCell>
                       <Button
@@ -229,7 +200,7 @@ export const UsersPage = () => {
               disabled={page === 1}
               onClick={() => setPage((p) => Math.max(p - 1, 1))}
             >
-              ← Précedent
+              ← Précédent
             </Button>
 
             <Typography>
@@ -245,7 +216,7 @@ export const UsersPage = () => {
             </Button>
 
             <Box ml="auto" display="flex" alignItems="center" gap={1}>
-              <Typography>Lignes par page:</Typography>
+              <Typography>Lignes par page :</Typography>
               <Select
                 size="small"
                 value={limit}

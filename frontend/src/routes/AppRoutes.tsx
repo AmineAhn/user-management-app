@@ -6,6 +6,7 @@ import { UsersPage } from "../pages/UsersPage";
 export const AppRoutes = () => (
   <BrowserRouter>
     <Routes>
+      <Route path="/" element={<LoginPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route
         path="/users"
